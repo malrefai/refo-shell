@@ -7,12 +7,15 @@ public class Main {
 
         while (true) {
             System.out.printf("$ ");
+            String input = scanner.nextLine();
 
-            String command = scanner.nextLine();
-            if(command.equalsIgnoreCase("exit")) {
+            if(input.equalsIgnoreCase("exit")) {
                 break;
+            } else if(input.startsWith("echo ")) {
+                System.out.println(input.substring(5).strip());
+            } else {
+                System.out.printf("%s: command not found%n", input);
             }
-            System.out.printf("%s: command not found%n", command);
         }
     }
 }
