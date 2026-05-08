@@ -6,16 +6,28 @@ public class Main {
         Scanner scanner = new Scanner(System.in);
 
         while (true) {
-            System.out.printf("$ ");
-            String input = scanner.nextLine();
+            System.out.print("$ ");
+            String input = scanner.nextLine().strip();
 
-            if(input.equalsIgnoreCase("exit")) {
+            String[] parts = input.split("\\s+", 2);
+            String command = parts[0];
+            String argument = (parts.length > 1) ? parts[1].strip() : "";
+
+            if(command.equals("exit"))
                 break;
-            } else if(input.startsWith("echo ")) {
-                System.out.println(input.substring(5).strip());
-            } else {
-                System.out.printf("%s: command not found%n", input);
-            }
+
+            System.out.println(switch (command) {
+                case "echo" -> argument;
+                case "type" -> evalType(argument);
+                default -> "%s: command not found%n".formatted(command);
+            });
         }
+    }
+
+    public static String evalType(String command) {
+        return switch (command) {
+          case "exit", "echo", "type" -> String.format("%s is a shell builtin", command);
+          default -> String.format("%s: not found", command);
+        };
     }
 }
