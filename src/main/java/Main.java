@@ -19,7 +19,7 @@ public class Main {
             System.out.println(switch (command) {
                 case "echo" -> argument;
                 case "type" -> evalType(argument);
-                default -> "%s: command not found%n".formatted(command);
+                default -> "%s: command not found".formatted(command);
             });
         }
     }
