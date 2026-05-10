@@ -1,6 +1,7 @@
 import java.io.File;
 import java.util.*;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 public class Main {
     public static final Set<String> BUILTINS = Set.of("exit", "echo", "type");
@@ -13,30 +14,37 @@ public class Main {
             System.out.print("$ ");
             String input = scanner.nextLine().strip();
 
-            String[] parts = input.split("\\s+", 2);
+            String[] parts = input.split("\\s+");
             String command = parts[0];
-            String argument = (parts.length > 1) ? parts[1].strip() : "";
+            String[] arguments = switch(parts.length) {
+                case int len when len > 1 -> Arrays.stream(parts).skip(1).toArray(String[]::new);
+                default -> new String[0];
+            };
 
-            if(command.equals("exit")) break;
-
-            Map<String, Function<String, String>> actions = Map.of(
-              "echo", cmd -> argument,
-              "type", cmd -> evalType(argument)
-            );
-
-            System.out.println(actions.getOrDefault(command, "%s: command not found"::formatted).apply(command));
+            if (command.isBlank()) {
+            } else if (command.equals("exit")) {
+                break;
+            } else if (BUILTINS.contains(command)) {
+                handleBuiltin(command, arguments);
+            } else {
+                if (findExecutable(command) != null) {
+                    execute(parts);
+                } else {
+                    System.out.printf("%s: command not found%n", command);
+                }
+            }
         }
     }
 
-    public static String evalType(String command) {
-        File executable;
-        if (BUILTINS.contains(command)) {
-            return String.format("%s is a shell builtin", command);
-        } else if ((executable = findExecutable(command)) != null) {
-            return String.format("%s is %s", command, executable);
-        } else {
-            return String.format("%s: not found", command);
-        }
+    public static void handleBuiltin(String command, String[] arguments) {
+        Map<String, Function<String, String>> actions = Map.of(
+                "echo", cmd -> String.join(" ", arguments),
+                "type", cmd -> Arrays.stream(arguments)
+                                                .map(Main::evalType)
+                                                .collect(Collectors.joining("\n"))
+        );
+
+        System.out.println( actions.getOrDefault(command, "%s: command not found"::formatted).apply(command));
     }
 
     public static File findExecutable(String command) {
@@ -44,11 +52,32 @@ public class Main {
         if (pathEnv == null) return null;
 
         String[] paths = pathEnv.split(File.pathSeparator);
-        for(String path : paths) {
+        for (String path : paths) {
             File file = new File(path, command);
             if (file.isFile() && file.canExecute()) return file.getAbsoluteFile();
         }
 
         return null;
+    }
+
+    public static String evalType(String command) {
+        if (BUILTINS.contains(command)) {
+            return String.format("%s is a shell builtin", command);
+        } else {
+            File executable;
+            if ((executable = findExecutable(command)) != null) {
+                return String.format("%s is %s", command, executable);
+            } else {
+                return String.format("%s: not found", command);
+            }
+        }
+    }
+
+    public static void execute(String[] fullCommand) throws Exception{
+        ProcessBuilder pb = new ProcessBuilder(fullCommand);
+        pb.inheritIO();
+
+        Process process = pb.start();
+        process.waitFor();
     }
 }
