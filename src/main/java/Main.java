@@ -1,10 +1,13 @@
 import java.io.File;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public class Main {
-    public static final Set<String> BUILTINS = Set.of("exit", "echo", "type");
+    public static final Set<String> BUILTINS = Set.of("exit", "echo", "pwd", "type");
+    public static Path currentPath =  Paths.get("").toAbsolutePath();
 
     public static void main(String[] args) throws Exception {
          // Capture the user's command in the "command" variable
@@ -26,12 +29,10 @@ public class Main {
                 break;
             } else if (BUILTINS.contains(command)) {
                 handleBuiltin(command, arguments);
+            } else if (findExecutable(command) != null) {
+                execute(parts);
             } else {
-                if (findExecutable(command) != null) {
-                    execute(parts);
-                } else {
-                    System.out.printf("%s: command not found%n", command);
-                }
+                System.out.printf("%s: command not found%n", command);
             }
         }
     }
@@ -39,6 +40,7 @@ public class Main {
     public static void handleBuiltin(String command, String[] arguments) {
         Map<String, Function<String, String>> actions = Map.of(
                 "echo", cmd -> String.join(" ", arguments),
+                "pwd", cmd -> currentPath.toString(),
                 "type", cmd -> Arrays.stream(arguments)
                                                 .map(Main::evalType)
                                                 .collect(Collectors.joining("\n"))
