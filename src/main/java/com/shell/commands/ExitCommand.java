@@ -8,6 +8,6 @@ public class ExitCommand implements Command {
     @Override
     public String execute(List<String> args, ShellContext context) {
         context.stop();
-        return "Goodbye!";
+        return "";
     }
 }

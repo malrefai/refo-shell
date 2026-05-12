@@ -29,7 +29,7 @@ public class Main {
 
             if (builtin != null) {
                 String result = builtin.execute(cmdArgs, context);
-                System.out.println(result);
+                if (!result.isBlank()) System.out.println(result);
             } else {
                 CommandExecutor.runExternal(cmdName, cmdArgs, context);
             }
