@@ -1,14 +1,13 @@
-package com.shell.commands;
-
-import com.shell.state.ShellContext;
+package shell.builtin;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
-public class CommandFactory {
+public class BuiltinFactory {
     private final Map<String, Command> builtins = new HashMap<>();
 
-    public CommandFactory() {
+    public BuiltinFactory() {
         builtins.put("cd", new CdCommand());
         builtins.put("echo", new EchoCommand());
         builtins.put("exit", new ExitCommand());
@@ -20,5 +19,9 @@ public class CommandFactory {
 
     public Command getCommand(String name) {
         return builtins.get(name);
+    }
+
+    public Set<String> getNames() {
+        return builtins.keySet();
     }
 }

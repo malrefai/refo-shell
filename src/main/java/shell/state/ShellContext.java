@@ -1,4 +1,4 @@
-package com.shell.state;
+package shell.state;
 
 import java.io.File;
 import java.nio.file.Path;

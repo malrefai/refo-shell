@@ -1,6 +1,6 @@
-package com.shell.commands;
+package shell.builtin;
 
-import com.shell.state.ShellContext;
+import shell.state.ShellContext;
 
 import java.util.List;
 
