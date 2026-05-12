@@ -17,6 +17,12 @@ public class CdCommand implements Command {
         String targetStr = args.getFirst();
 
         // Handle the Home Directory shortcut (~)
+        if (targetStr.startsWith("~")) {
+            String home = System.getenv("HOME");
+            if (home == null) home = System.getProperty("user.home");
+
+            targetStr = targetStr.replaceFirst("^~", home);
+        }
 
         Path targetPath = Paths.get(targetStr);
 
@@ -33,7 +39,7 @@ public class CdCommand implements Command {
             context.setCurrentDirectory(targetPath);
             return "";
         } else {
-            return "cd: %s: No such file or directory".formatted(args.getFirst());
+            return "cd: %s: No such file or directory".formatted(targetStr);
         }
     }
 }
