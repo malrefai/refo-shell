@@ -15,14 +15,25 @@ public class CdCommand implements Command {
         }
 
         String targetStr = args.getFirst();
+
+        // Handle the Home Directory shortcut (~)
+
         Path targetPath = Paths.get(targetStr);
 
-        // Validate: Does it exist and is it a folder?
+        // Resolve Relative Paths (./, ../, or dir/)
+        if (!targetPath.isAbsolute()) {
+            targetPath = context.getCurrentDirectory().resolve(targetPath);
+        }
+
+        // Normalize the Path
+        targetPath = targetPath.normalize().toAbsolutePath();
+
+        // Validate and Update State
         if (Files.isDirectory(targetPath)) {
             context.setCurrentDirectory(targetPath);
             return "";
         } else {
-            return "cd: %s: No such file or directory".formatted(targetStr);
+            return "cd: %s: No such file or directory".formatted(args.getFirst());
         }
     }
 }
