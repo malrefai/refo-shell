@@ -1,0 +1,12 @@
+package com.shell.commands;
+
+import com.shell.state.ShellContext;
+
+import java.util.List;
+
+public class EchoCommand implements Command {
+    @Override
+    public String execute(List<String> args, ShellContext context) {
+        return String.join(" ", args);
+    }
+}
