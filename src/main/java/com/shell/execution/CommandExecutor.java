@@ -18,11 +18,11 @@ public class CommandExecutor {
 
         if (executable != null) {
             try {
-                String[] fullCommand = Stream.concat(
-                        Stream.of(executable.toString()),
+                String[] commandForProgram = Stream.concat(
+                        Stream.of(cmdName),
                         args.stream()
                 ).toArray(String[]::new);
-                ProcessBuilder pb = new ProcessBuilder(fullCommand);
+                ProcessBuilder pb = new ProcessBuilder(commandForProgram);
 
                 pb.directory(context.getCurrentDirectory().toFile());
                 pb.inheritIO();
