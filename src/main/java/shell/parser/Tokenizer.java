@@ -4,6 +4,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Tokenizer {
+    private Tokenizer() {
+        /* This utility class should not be instantiated */
+    }
 
     // state container
     private static class TokenState {
@@ -25,20 +28,20 @@ public class Tokenizer {
 
         TokenState state = new TokenState();
         boolean inSingleQuotes = false;
+        boolean inDoubleQuotes = false;
 
         for (char c : input.toCharArray()) {
             if (inSingleQuotes) {
-                if (c == '\'') {
-                    inSingleQuotes = false;
-                    state.hasContent = true;
-                } else {
-                    state.currentToken.append(c);
-                }
+                inSingleQuotes = inQuotes(state, '\'', c);
+            } else if (inDoubleQuotes) {
+                inDoubleQuotes = inQuotes(state, '"', c);
             } else { // Unquoted text
                 if ( c == '\'') {
                     inSingleQuotes = true;
+                } else if (c == '"') {
+                    inDoubleQuotes = true;
                 } else if (Character.isWhitespace(c)) {
-                    state.flush(); // Clean and readable
+                    state.flush(); // Whitespace acts as a delimiter only when unquoted
                 } else {
                     // Regular character outside quotes
                     state.currentToken.append(c);
@@ -48,5 +51,15 @@ public class Tokenizer {
 
         state.flush(); // Catch the final token if the string doesn't end with a space
         return state.tokens;
+    }
+
+    private static boolean inQuotes(TokenState state, char quote, char character) {
+        if (character == quote) {
+            state.hasContent = true; // Remembers explicit content (handles '' or "")
+            return false;
+        } else {
+            state.currentToken.append(character);
+            return true;
+        }
     }
 }
