@@ -27,24 +27,29 @@ public class Tokenizer {
         if (input  == null || input.isBlank()) return List.of();
 
         TokenState state = new TokenState();
+        boolean isEscaped = false;
         boolean inSingleQuotes = false;
         boolean inDoubleQuotes = false;
 
         for (char c : input.toCharArray()) {
-            if (inSingleQuotes) {
+            if (isEscaped) {
+                state.currentToken.append(c);
+                isEscaped = false;
+            } else if (inSingleQuotes) {
                 inSingleQuotes = inQuotes(state, '\'', c);
             } else if (inDoubleQuotes) {
                 inDoubleQuotes = inQuotes(state, '"', c);
             } else { // Unquoted text
-                if ( c == '\'') {
-                    inSingleQuotes = true;
+                if (c =='\\') {
+                    isEscaped = true; // Escaped character
+                } else if ( c == '\'') {
+                    inSingleQuotes = true; // Start of single-quoted string
                 } else if (c == '"') {
-                    inDoubleQuotes = true;
+                    inDoubleQuotes = true; // Start of double-quoted string
                 } else if (Character.isWhitespace(c)) {
                     state.flush(); // Whitespace acts as a delimiter only when unquoted
                 } else {
-                    // Regular character outside quotes
-                    state.currentToken.append(c);
+                    state.currentToken.append(c); // Normal character
                 }
             }
         }
