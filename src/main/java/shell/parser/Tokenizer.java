@@ -28,6 +28,7 @@ public class Tokenizer {
 
         TokenState state = new TokenState();
         boolean isEscaped = false;
+        boolean isDoubleQuoteEscaped = false;
         boolean inSingleQuotes = false;
         boolean inDoubleQuotes = false;
 
@@ -38,7 +39,20 @@ public class Tokenizer {
             } else if (inSingleQuotes) {
                 inSingleQuotes = inQuotes(state, '\'', c);
             } else if (inDoubleQuotes) {
-                inDoubleQuotes = inQuotes(state, '"', c);
+                if (isDoubleQuoteEscaped) {
+                    isDoubleQuoteEscaped = false;
+                    if (c == '"' || c == '\\') {
+                        // Valid escape sequence, preserve the escape character
+                        state.currentToken.append(c);
+                    } else {
+                        // Invalid escape: preserve the backslash AND append the character
+                        state.currentToken.append('\\').append(c);
+                    }
+                } else if (c == '\\') {
+                    isDoubleQuoteEscaped = true; // Turn on lookahead flag for the next iteration
+                } else {
+                    inDoubleQuotes = inQuotes(state, '"', c);
+                }
             } else { // Unquoted text
                 if (c =='\\') {
                     isEscaped = true; // Escaped character
